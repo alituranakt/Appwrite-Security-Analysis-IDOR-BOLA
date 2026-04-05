@@ -7,13 +7,35 @@
 
 ---
 
+## Repository Structure
+
+```
+Appwrite-Security-Analysis-IDOR-BOLA/
+├── README.md                        ← Main analysis report (this file)
+├── LICENSE                          ← MIT License
+├── .gitignore
+│
+├── scripts/
+│   ├── cleanup.sh                   ← Step 2: Automated Appwrite removal script
+│   └── verify-cleanup.sh            ← Step 2: Post-removal verification script
+│
+├── poc/
+│   └── idor-demo.py                 ← Step 5: IDOR/BOLA proof of concept demo
+│
+└── docs/
+    ├── threat-model.md              ← Step 5: Full STRIDE threat model
+    └── docker-security-audit.md    ← Step 4: Docker security audit checklist
+```
+
+---
+
 ## Table of Contents
 
 1. [Step 1: Installation & install.sh Analysis (Reverse Engineering)](#step-1-installation--installsh-analysis-reverse-engineering)
 2. [Step 2: Isolation & Trace-Free Cleanup (Forensics & Cleanup)](#step-2-isolation--trace-free-cleanup-forensics--cleanup)
 3. [Step 3: CI/CD Pipeline Analysis (.github/workflows)](#step-3-cicd-pipeline-analysis-githubworkflows)
 4. [Step 4: Docker Architecture & Container Security](#step-4-docker-architecture--container-security)
-5. [Step 5: Source Code & Threat Modeling (IDOR/BOLA Focus)](#step-5-source-code--threat-modeling-idorbola-focus)
+5. [Step 5: Source Code & Threat Modeling — AI-Assisted Analysis](#step-5-source-code--threat-modeling--ai-assisted-analysis)
 6. [References](#references)
 
 ---
@@ -116,6 +138,8 @@ appwrite-builds, appwrite-config
 ## Step 2: Isolation & Trace-Free Cleanup (Forensics & Cleanup)
 
 > **Recommendation:** Always perform installation and testing in a virtual machine (VM) for safe analysis.
+
+> **Automation:** The cleanup procedure below is fully automated in [`scripts/cleanup.sh`](scripts/cleanup.sh). Run `scripts/verify-cleanup.sh` afterwards to confirm zero residual traces with a pass/fail report.
 
 ### 2.1 Complete Removal Procedure
 
@@ -233,6 +257,8 @@ Running the analysis in a VM provides:
 
 ## Step 3: CI/CD Pipeline Analysis (.github/workflows)
 
+> **CI/CD Simulation:** The pipeline analysis below simulates what happens when a developer pushes code — from the moment the `git push` is executed to the Docker image landing in Docker Hub. Each stage is documented as it would appear in the GitHub Actions runner.
+
 ### 3.1 Workflow Inventory
 
 The Appwrite repository contains **12+ workflow files**:
@@ -334,6 +360,10 @@ Push to Docker Hub → Deploy webhook triggers production update
 ---
 
 ## Step 4: Docker Architecture & Container Security
+
+> **Docker Architecture Simulation:** The analysis below traces exactly what happens from `docker compose up` to a fully running Appwrite stack — which images are pulled, which networks are created, how containers communicate, and where security boundaries exist.
+>
+> For the full Docker security checklist and production hardening guide, see [`docs/docker-security-audit.md`](docs/docker-security-audit.md).
 
 ### 4.1 Dockerfile Analysis
 
@@ -469,7 +499,108 @@ The executor service mounts the host's Docker daemon socket. This allows Appwrit
 
 ---
 
-## Step 5: Source Code & Threat Modeling (IDOR/BOLA Focus)
+## Step 5: Source Code & Threat Modeling — AI-Assisted Analysis
+
+> **Professor's Note:** *"The actual goal of this assignment is to have a model with reasoning/Antigravity capability do this analysis and learn that discovery technique."*
+> This section documents how an AI reasoning model was used to analyze Appwrite's source code and identify security vulnerabilities — including the exact reasoning chain it followed.
+
+---
+
+### 5.0 AI-Assisted Source Code Analysis — Methodology
+
+#### What Was Asked and How the AI Reasoned
+
+A reasoning-capable AI model was prompted to act as a security researcher and analyze the Appwrite repository from scratch. The prompt used was:
+
+```
+"You are a security researcher. Analyze the appwrite/appwrite GitHub repository.
+Find the entrypoint, locate the authentication mechanism, and identify any
+IDOR/BOLA vulnerabilities a hacker could exploit. Explain your reasoning step by step."
+```
+
+#### Step-by-Step Reasoning Chain the AI Followed
+
+**Stage 1 — Find the Entrypoint**
+```
+Reasoning: "When analyzing an unknown PHP application, the entry point is
+typically defined in the web server config or a main HTTP handler.
+I should look for: index.php, http.php, server.php, or Dockerfile CMD."
+
+Finding: Dockerfile contains → CMD ["php", "app/http.php"]
+         Therefore: app/http.php is the HTTP entry point.
+```
+
+**Stage 2 — Trace the Initialization**
+```
+Reasoning: "http.php likely includes an init file. Let me follow the require/include chain."
+
+Finding: app/http.php → requires app/init.php
+         app/init.php → registers routes, loads components, configures DB
+         Routes → app/controllers/api/*.php
+```
+
+**Stage 3 — Locate Authentication**
+```
+Reasoning: "Authentication is usually in an 'account' or 'auth' controller.
+I also need to check for middleware or a shared Auth class."
+
+Finding: app/controllers/api/account.php → handles login, sessions, OAuth
+         src/Appwrite/Auth/Auth.php → static auth helper methods
+         Three mechanisms: Sessions (cookies), API Keys (header), JWT (token)
+```
+
+**Stage 4 — Identify IDOR Attack Surface**
+```
+Reasoning: "Now I know the auth mechanisms. As a hacker, I ask:
+'Are there API endpoints that take a user-controlled ID as a parameter
+without verifying that the authenticated user owns that resource?'
+
+I should look for patterns like:
+  GET /v1/{resource}/{id}   ← ID is user-controlled
+  POST /v1/{resource}       ← data fields may contain spoofable IDs
+
+I'll check: databases.php, storage.php, teams.php, users.php"
+
+Finding: All four controllers follow the pattern {resource}/{id}
+         Authorization is based on collection/bucket-level permissions
+         → If permissions are misconfigured, IDOR is trivially exploitable
+```
+
+**Stage 5 — Find the Missing Server-Side Validation**
+```
+Reasoning: "For document creation, the client sends a 'data' object.
+Does Appwrite validate that fields inside 'data' match the authenticated user?
+Let me check the document creation handler."
+
+Finding: No server-side validation of user-controlled fields in document data.
+         A client can set data.userId = "any_other_user_id"
+         Appwrite stores it without checking.
+         → This is the userId spoofing vulnerability (GitHub Issue #10491)
+```
+
+**Stage 6 — Identify What Data an Attacker Can Steal**
+```
+Reasoning: "Given these vulnerabilities, what sensitive data is reachable?
+  1. All documents in misconfigured collections → business data, PII
+  2. Private files in buckets with weak permissions → uploads, configs
+  3. User metadata via /v1/users (Server API) → emails, phone numbers
+  4. Team membership info → organizational structure
+  5. API keys in leaked environment → full project access"
+```
+
+#### Key Insight: Why AI Reasoning Works Better Than Manual Review
+
+Traditional code review would require manually reading thousands of lines of PHP. The AI reasoning model:
+
+1. **Follows logical call chains** automatically (http.php → init.php → controller)
+2. **Applies known vulnerability patterns** (OWASP Top 10) to each endpoint
+3. **Asks "what if" questions** at each authorization checkpoint
+4. **Cross-references multiple files** simultaneously to find missing validations
+5. **Maps data flow** from input to storage to identify injection/spoofing points
+
+This is the core technique: instruct the AI to think like an attacker, give it a high-level description of the codebase structure, and let it reason about where authorization checks are absent or incomplete.
+
+---
 
 ### 5.1 Understanding IDOR/BOLA
 
@@ -688,6 +819,9 @@ Appwrite uses a **dual authorization model**:
 │                                                               │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+> **Proof of Concept:** The full IDOR/BOLA attack chain is implemented and documented in [`poc/idor-demo.py`](poc/idor-demo.py) — run it against a local Appwrite instance to see the vulnerabilities in action.
+> The full STRIDE threat model is in [`docs/threat-model.md`](docs/threat-model.md).
 
 ### 5.8 Recommended Mitigations
 
