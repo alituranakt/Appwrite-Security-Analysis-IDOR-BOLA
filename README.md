@@ -163,6 +163,12 @@ docker compose up --build
 
 Bu komut web arayuzunu `http://localhost:8080` adresinde ayaga kaldirir.
 
+## 🎬 Demo
+
+Bu laboratuvarin kurulum, CRUD islemleri ve IDOR/BOLA saldiri simulasyonu adimlarini gosteren ornek kayda asagidan ulasabilirsiniz.
+
+![Project Demo](demo/project-demo.webm)
+
 ## Demo Senaryosu
 
 1. Ilk tarayicida `kullanici-A` hesabiyla giris yap.
