@@ -217,3 +217,5 @@ Beklenen sonuc:
 - Varsayilan branch: `1.9.x`
 - Son kararli release: `1.8.1` (`2025-12-23`)
 - Ek inceleme: `appwrite/appwrite#11553` (`Use injected user document for privilege checks`, merge tarihi `2026-03-30`)
+- 
+<img width="28" height="28" alt="download" src="https://github.com/user-attachments/assets/4236c05d-fa2f-4943-a7a8-4410e97b1b7e" />
