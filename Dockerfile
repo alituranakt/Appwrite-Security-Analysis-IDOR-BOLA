@@ -24,29 +24,57 @@
 # ====================================================================== #
 #  STAGE 1: BUILDER - Bağımlılık Kurulumu
 # ====================================================================== #
-FROM python:3.12-slim
+FROM python:3.10-slim AS builder
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+# Çalışma dizini
+WORKDIR /build
 
+# Önce sadece requirements.txt'yi kopyala (Docker cache optimizasyonu)
+# Bu sayede bağımlılıklar değişmedikçe bu katman cache'den gelir
+COPY poc/requirements.txt ./requirements.txt
+
+# Python bağımlılıklarını kur
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ====================================================================== #
+#  STAGE 2: PRODUCTION - Çalışma Ortamı
+# ====================================================================== #
+FROM python:3.10-slim AS production
+
+# Metadata etiketleri
+LABEL maintainer="alituranakt"
+LABEL description="Appwrite Security Analysis - IDOR/BOLA PoC Environment"
+LABEL version="1.0"
+
+# Güvenlik: Non-root kullanıcı oluştur
+# Root olarak çalıştırmak güvenlik riski oluşturur
+RUN groupadd -r analyst && useradd -r -g analyst -m analyst
+
+# Çalışma dizini
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends bash curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd --create-home --shell /bin/bash analyst
+# Builder stage'den Python paketlerini kopyala
+COPY --from=builder /install /usr/local
 
-COPY poc/requirements.txt /tmp/requirements.txt
-RUN pip install --upgrade pip && pip install -r /tmp/requirements.txt
+# Proje dosyalarını kopyala
+COPY poc/ ./poc/
+COPY Scripts/ ./Scripts/
+COPY docs/ ./docs/
+COPY README.md ./
 
-COPY . /app
-RUN chown -R analyst:analyst /app && chmod +x /app/scripts/*.sh
+# Dizin izinlerini ayarla
+RUN mkdir -p /app/results /app/logs \
+    && chown -R analyst:analyst /app
 
+# Script izinleri
+RUN chmod +x Scripts/*.sh 2>/dev/null || true
+
+# Non-root kullanıcıya geç
 USER analyst
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD python -c "import requests; print('ok')" || exit 1
+# Sağlık kontrolü: Python ve bağımlılıkların çalıştığını doğrula
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; print('OK')" || exit 1
 
-CMD ["python", "poc/idor_demo.py", "--dry-run"]
-
+# Varsayılan komut: PoC scriptinin yardım çıktısı
+CMD ["python", "poc/idor-demo.py", "--help"]
