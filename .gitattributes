@@ -1,17 +1,11 @@
-* text=auto eol=lf
+# Handle line endings automatically
+* text=auto
 
+# Force bash scripts to use LF (crucial for Docker/Linux)
 *.sh text eol=lf
-*.py text eol=lf
-*.yml text eol=lf
-*.yaml text eol=lf
-*.md text eol=lf
-*.env.example text eol=lf
 
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.pdf binary
+# Python files
+*.py text diff=python
 
-results/** linguist-generated=true
-logs/** linguist-generated=true
+# Documentation
+*.md text
