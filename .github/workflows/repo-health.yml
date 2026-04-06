@@ -1,0 +1,65 @@
+name: repo-health
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install function dependencies
+        run: npm install
+        working-directory: functions/insecure-invoice-proxy
+
+      - name: Install secure function dependencies
+        run: npm install
+        working-directory: functions/secure-invoice-proxy
+
+      - name: Check repository structure
+        run: npm run check
+
+      - name: Syntax check bootstrap script
+        run: node --check scripts/bootstrap-lab.mjs
+
+      - name: Syntax check reset script
+        run: node --check scripts/reset-lab.mjs
+
+      - name: Syntax check insecure function
+        run: node --check functions/insecure-invoice-proxy/src/main.js
+
+      - name: Syntax check secure function
+        run: node --check functions/secure-invoice-proxy/src/main.js
+
+      - name: Syntax check web app
+        run: node --check web/app.js
+
+  docs-presence:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assert mandatory docs
+        run: |
+          test -f docs/01-kurulum-ve-install-analizi.md
+          test -f docs/03-is-akislari-ve-cicd-pipeline-analizi.md
+          test -f docs/04-docker-mimarisi-ve-konteyner-guvenligi.md
+          test -f docs/05-kaynak-kod-ve-akis-analizi.md
+          test -f docs/06-idor-bola-vaka-calismasi.md
