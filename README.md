@@ -222,6 +222,21 @@ Beklenen sonuc:
 
 ## Incelenen Upstream Bilgisi
 
+## 🎬 Demo
+
+![Project Demo](./demo/project-demo.webm)
+
+## Ozet
+
+- `main.py`: CLI tabanli demo ve benchmark akisi
+- `app.py`: JWT korumali Flask API
+- `src/`: hashing, salting, saldiri simulasyonu, benchmark ve gorsellestirme modulleri
+- `tests/`: unit testler
+- `docs/RAPOR.md`: ders icin detayli analiz raporu
+- `install.sh` / `uninstall.sh`: kurulum ve temiz kaldirma scriptleri
+- `Dockerfile` / `docker-compose.yml`: container tabanli calistirma
+- `.github/workflows/ci.yml`: otomatik test ve kalite kontrolu
+
 - Arastirma tarihi: `2026-04-06`
 - Upstream repo: `appwrite/appwrite`
 - Varsayilan branch: `1.9.x`
