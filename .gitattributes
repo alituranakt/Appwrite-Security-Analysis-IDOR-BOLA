@@ -1,11 +1,58 @@
-# Handle line endings automatically
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║  .gitattributes — Appwrite Security Analysis                        ║
+# ║  Dosya satır sonu ve diff davranışlarını standartlaştırır           ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+
+# Genel: tüm metin dosyalarında satır sonlarını otomatik normalize et
 * text=auto
 
-# Force bash scripts to use LF (crucial for Docker/Linux)
-*.sh text eol=lf
+# ── Kaynak Kod ──────────────────────────────────────────────────────────
+# Python dosyaları: LF satır sonu + Python-aware diff
+*.py            text eol=lf diff=python
 
-# Python files
-*.py text diff=python
+# Shell scriptleri: Docker/Linux için LF zorunlu (CRLF çalışmaz!)
+*.sh            text eol=lf
 
-# Documentation
-*.md text
+# ── Yapılandırma Dosyaları ───────────────────────────────────────────────
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.json          text eol=lf
+*.toml          text eol=lf
+*.ini           text eol=lf
+*.cfg           text eol=lf
+*.env           text eol=lf
+*.env.example   text eol=lf
+*.env.sample    text eol=lf
+Makefile        text eol=lf
+
+# ── Dokümantasyon ────────────────────────────────────────────────────────
+*.md            text diff=markdown
+*.txt           text
+*.rst           text
+*.html          text diff=html
+*.css           text diff=css
+LICENSE         text
+
+# ── Docker ───────────────────────────────────────────────────────────────
+Dockerfile      text eol=lf
+.dockerignore   text eol=lf
+docker-compose* text eol=lf
+compose*        text eol=lf
+
+# ── Git ──────────────────────────────────────────────────────────────────
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+
+# ── Binary Dosyalar (diff yapma, karıştırma) ─────────────────────────────
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.ico           binary
+*.pdf           binary
+*.zip           binary
+*.gz            binary
+*.tar           binary
+
+# ── GitHub Actions ───────────────────────────────────────────────────────
+.github/workflows/*.yml text eol=lf
