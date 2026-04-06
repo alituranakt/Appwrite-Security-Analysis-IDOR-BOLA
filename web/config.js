@@ -1,6 +1,6 @@
 window.APP_CONFIG = {
   endpoint: "https://cloud.appwrite.io/v1",
-  projectId: "YOUR_PROJECT_ID",
+  projectId: "mock-project",
   databaseId: "idorlab",
   tableId: "invoices",
   insecureBucketId: "invoices-public",
