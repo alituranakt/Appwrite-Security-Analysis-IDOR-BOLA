@@ -1,0 +1,9 @@
+services:
+  idor-lab-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: appwrite-idor-bola-lab
+    ports:
+      - "8080:80"
+    restart: unless-stopped
