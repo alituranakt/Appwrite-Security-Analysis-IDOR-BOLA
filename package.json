@@ -1,0 +1,15 @@
+{
+  "name": "appwrite-idor-bola-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Appwrite tabanli IDOR/BOLA laboratuvari ve analiz reposu",
+  "scripts": {
+    "bootstrap": "node scripts/bootstrap-lab.mjs",
+    "reset": "node scripts/reset-lab.mjs",
+    "check": "node scripts/validate-repo.mjs"
+  },
+  "dependencies": {
+    "node-appwrite": "^22.1.3"
+  }
+}
