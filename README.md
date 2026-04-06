@@ -222,10 +222,6 @@ Beklenen sonuc:
 
 ## Incelenen Upstream Bilgisi
 
-## 🎬 Demo
-
-![Project Demo](./demo/project-demo.webm)
-
 ## Ozet
 
 - `main.py`: CLI tabanli demo ve benchmark akisi
