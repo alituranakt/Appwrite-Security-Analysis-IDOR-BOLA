@@ -1,5 +1,15 @@
 # Appwrite IDOR/BOLA Lab
 
+[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![Docs](https://img.shields.io/badge/docs-available-22c55e)](./docs)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](./docker-compose.yml)
+[![CI](https://img.shields.io/badge/ci-github_actions-2088FF?logo=githubactions&logoColor=white)](./.github/workflows/repo-health.yml)
+[![Appwrite](https://img.shields.io/badge/backend-Appwrite-F02E65?logo=appwrite&logoColor=white)](https://appwrite.io/)
+
+<p align="right">
+  <img width="28" height="28" alt="Istinye University logo" src="https://github.com/user-attachments/assets/4236c05d-fa2f-4943-a7a8-4410e97b1b7e" />
+</p>
+
 Bu repository, vize konusu olarak secilen `Rol Karmasasi (IDOR / BOLA)` basligini Appwrite uzerinde hem teorik analiz hem de calisan laboratuvar olarak teslim etmek icin hazirlandi. Yani repo sadece dokuman degil; Appwrite kaynaklarini kuran script'ler, iki farkli Function akisi, web arayuzu, GitHub Actions ve akademik analiz belgeleri ayni yerde bulunur.
 
 ## Bu repo neyi gosteriyor?
@@ -217,5 +227,3 @@ Beklenen sonuc:
 - Varsayilan branch: `1.9.x`
 - Son kararli release: `1.8.1` (`2025-12-23`)
 - Ek inceleme: `appwrite/appwrite#11553` (`Use injected user document for privilege checks`, merge tarihi `2026-03-30`)
-- 
-<img width="28" height="28" alt="download" src="https://github.com/user-attachments/assets/4236c05d-fa2f-4943-a7a8-4410e97b1b7e" />
