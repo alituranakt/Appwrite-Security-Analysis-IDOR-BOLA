@@ -31,6 +31,7 @@ flowchart LR
 - `functions/secure-invoice-proxy/`: ownership kontrolu yapan guvenli Function
 - `scripts/bootstrap-lab.mjs`: database, table, column, index ve bucket kurulum script'i
 - `scripts/reset-lab.mjs`: lab kaynaklarini temizleme script'i
+- `Dockerfile` ve `docker-compose.yml`: web arayuzunu container olarak yayinlama
 - `.github/workflows/`: repo saglik kontrolu ve GitHub Pages deploy workflow'lari
 - `docs/`: hocanin istedigi analiz adimlari ve kaynakca
 
@@ -144,6 +145,13 @@ Iki yol hazir:
 
 - `web/` klasorunu herhangi bir static host ile yayinla
 - Repo `main` branch'e push edilince GitHub Pages workflow'unu kullan
+- Docker ile lokal yayinla:
+
+```bash
+docker compose up --build
+```
+
+Bu komut web arayuzunu `http://localhost:8080` adresinde ayaga kaldirir.
 
 ## Demo Senaryosu
 
@@ -176,6 +184,14 @@ Beklenen sonuc:
 
 - `repo-health`: yapisal kontrol, syntax kontrolu ve zorunlu dokuman denetimi
 - `deploy-pages`: `web/` klasorunu GitHub Pages olarak yayinlar
+
+## Repo Profesyonelligi
+
+- `.gitignore` mevcut
+- `.gitattributes` mevcut
+- `.env.example` mevcut
+- Docker dosyalari mevcut: `Dockerfile`, `docker-compose.yml`, `.dockerignore`
+- CI/CD mevcut: `.github/workflows/repo-health.yml`, `.github/workflows/deploy-pages.yml`
 
 ## Kullanilan SDK Surumleri
 
