@@ -1,0 +1,27 @@
+name: Security Analysis CI
+
+on: [push, pull_request]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 appwrite
+          
+      - name: Lint with flake8
+        run: |
+          # Syntax hatalarını kontrol eder
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Verify scripts permissions
+        run: chmod +x src/scripts/*.sh
